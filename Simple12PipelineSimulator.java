@@ -1,30 +1,68 @@
 public class Simple12PipelineSimulator {
 
-    // Define pipeline stages and required hardware
-    private static final String[][] pipelineStages = {
+    // Define generic pipeline stages
+    private static final String[][] genericPipelineStages = {
         {"Fetch", "Program Counter", "Memory"},
         {"Decode", "Instruction Decoder", "Control Unit"},
-        {"Execute", "ALU (Arithmetic Logic Unit)"},
-        {"Memory Access", "Memory"},
+        {"Execute"},
+        {"Memory Access"},
         {"Write Back", "Registers"}
     };
+
+    // Determine specific hardware requirements based on instruction type
+    private static String[] getHardwareForStage(String stage, String instruction) {
+        String operation = instruction.split(" ")[0].toUpperCase();
+
+        switch (stage) {
+            case "Fetch":
+                return new String[]{"Program Counter", "Memory"};
+
+            case "Decode":
+                return new String[]{"Instruction Decoder", "Control Unit"};
+
+            case "Execute":
+                if (operation.equals("ADD") || operation.equals("SUB")) {
+                    return new String[]{"ALU (Arithmetic Logic Unit)"};
+                }
+                return new String[]{};
+
+            case "Memory Access":
+                if (operation.equals("LOAD") || operation.equals("STORE")) {
+                    return new String[]{"Memory"};
+                }
+                return new String[]{};
+
+            case "Write Back":
+                if (!operation.equals("JMP")) {  // Only write back if we're not jumping
+                    return new String[]{"Registers"};
+                }
+                return new String[]{};
+
+            default:
+                return new String[]{};
+        }
+    }
 
     // Simulate the pipeline for a given instruction
     public static void simulatePipeline(String instruction) {
         System.out.println("Simulating Simple12 Instruction Pipeline for: " + instruction);
         System.out.println("------------------------------------------------");
 
-        for (String[] stage : pipelineStages) {
-            String stageName = stage[0];
-            System.out.print("Stage: " + stageName + "\n  Hardware needed: ");
-            
-            // List the hardware components for the current stage
-            for (int i = 1; i < stage.length; i++) {
-                System.out.print(stage[i]);
-                if (i < stage.length - 1) System.out.print(", ");
+        for (String[] stageInfo : genericPipelineStages) {
+            String stage = stageInfo[0];
+            String[] requiredHardware = getHardwareForStage(stage, instruction);
+
+            System.out.print("Stage: " + stage + "\n  Hardware needed: ");
+            if (requiredHardware.length > 0) {
+                for (int i = 0; i < requiredHardware.length; i++) {
+                    System.out.print(requiredHardware[i]);
+                    if (i < requiredHardware.length - 1) System.out.print(", ");
+                }
+            } else {
+                System.out.print("None");
             }
             System.out.println("\n  Processing instruction: " + instruction);
-            
+
             // Simulate processing delay
             try {
                 Thread.sleep(1000);  // 1 second delay for demonstration
@@ -32,10 +70,10 @@ public class Simple12PipelineSimulator {
                 Thread.currentThread().interrupt();
                 System.out.println("Simulation interrupted.");
             }
-            
+
             System.out.println("------------------------------------------------");
         }
-        
+
         System.out.println("Pipeline processing complete.");
     }
 }

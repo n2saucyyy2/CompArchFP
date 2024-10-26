@@ -12,31 +12,27 @@ public class Main {
         System.out.println("Enter 1 to read from a file, 2 to enter an instruction directly: ");
         String choice = scanner.nextLine().trim();
 
-        String instruction = null;
-        
         if (choice.equals("1")) {
             System.out.print("Enter the filename: ");
             String filename = scanner.nextLine().trim();
             
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-                instruction = reader.readLine();
+                String instruction;
+                while ((instruction = reader.readLine()) != null) {
+                    if (!instruction.trim().isEmpty()) {
+                        // Simulate the pipeline for each instruction in the file
+                        Simple12PipelineSimulator.simulatePipeline(instruction.trim());
+                    }
+                }
             } catch (IOException e) {
                 System.out.println("File not found or could not be read.");
-                scanner.close();
-                return;
             }
         } else if (choice.equals("2")) {
             System.out.print("Enter the Simple12 instruction: ");
-            instruction = scanner.nextLine().trim();
+            String instruction = scanner.nextLine().trim();
+            Simple12PipelineSimulator.simulatePipeline(instruction);
         } else {
             System.out.println("Invalid choice.");
-            scanner.close();
-            return;
-        }
-
-        // Start pipeline simulation
-        if (instruction != null) {
-            Simple12PipelineSimulator.simulatePipeline(instruction);
         }
 
         scanner.close();
